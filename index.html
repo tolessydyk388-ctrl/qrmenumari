@@ -1,122 +1,105 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Заказ еды — Компьютерный клуб</title>
-  <style></style>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-main: #F6F4F1;
-      --bg-card: #FFFFFF;
-      --bg-soft: #EFEAE6;
-      --accent: #B89B7C;
-      --accent-hover: #A88A6A;
-      --text-main: #2E2E2E;
-      --radius: 16px;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Заказ еды — Компьютерный клуб</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-main: #F6F4F1;
+  --bg-card: #FFFFFF;
+  --accent: #B89B7C;
+  --accent-hover: #A88A6A;
+  --text-main: #2E2E2E;
+  --radius: 16px;
+}
 
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Cormorant Garamond', serif; background: var(--bg-main); color: var(--text-main); transition: background 0.3s; }
 
-    body {
-      margin: 0;
-      font-family: 'Cormorant Garamond', serif;
-      background: var(--bg-main);
-      color: var(--text-main);
-    }
+h2 { margin-bottom: 12px; }
+.hidden { display: none; }
 
-    h2 { margin-bottom: 12px; }
+.card { background: var(--bg-card); border-radius: var(--radius); padding: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.04); }
 
-    .hidden { display: none; }
+.pc-select { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
 
-    .card {
-      background: var(--bg-card);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.04);
-    }
+select, textarea, button {
+  width: 100%; padding: 16px; border-radius: var(--radius); border: 1px solid #ddd; font-size: 18px; font-family: inherit;
+}
 
-    .pc-select {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+button { background: var(--accent); color: #fff; border: none; cursor: pointer; transition: background 0.3s, transform 0.2s; }
+button:hover { background: var(--accent-hover); }
 
-    select, textarea, button {
-      width: 100%;
-      padding: 14px;
-      border-radius: var(--radius);
-      border: 1px solid #ddd;
-      font-size: 16px;
-      font-family: inherit;
-    }
+.container { max-width: 500px; margin: 0 auto; padding: 16px; }
 
-    button {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
+.menu-list { display: flex; flex-direction: column; gap: 12px; }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px;
-    }
+.menu-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-card); border-radius: var(--radius); box-shadow: 0 3px 10px rgba(0,0,0,0.05); font-size: 18px; transition: transform 0.3s, box-shadow 0.3s; }
+.menu-row.added { animation: pop 0.3s; }
+.menu-name { font-style: italic; }
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 24px;
-    }
+@keyframes pop {
+  0% { transform: scale(0.9); opacity:0; }
+  100% { transform: scale(1); opacity:1; }
+}
 
-    .menu {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-    }
+/* Плавающая корзина */
+.cart-button {
+  position: fixed; right: 16px; bottom: 16px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 50%;
+  width: 56px; height: 56px;
+  font-size: 24px; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000;
+  display: flex; justify-content:center; align-items:center;
+  transition: transform 0.2s;
+}
+.cart-button:active { transform: scale(0.9); }
 
-    .menu-row {
-      display: grid;
-      grid-template-columns: 1fr auto auto;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid #e6e1db;
-      font-size: 18px;
-    }
+.cart-count {
+  position: absolute;
+  top: -6px; right: -6px;
+  background: red; color: #fff;
+  border-radius: 50%; width: 20px; height: 20px;
+  font-size: 12px; display: flex; justify-content: center; align-items: center;
+  transition: transform 0.2s;
+}
 
-    .menu-name { font-style: italic; }
+/* Панель корзины */
+.cart-panel {
+  position: fixed; top: 0; right: 0;
+  width: 90%; max-width: 400px; height: 100%;
+  background: var(--bg-card);
+  box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+  padding: 16px;
+  transform: translateX(100%);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  z-index: 1001;
+  display: flex; flex-direction: column;
+}
+.cart-panel.open { transform: translateX(0); }
 
-    .cart {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg-card);
-      padding: 16px;
-      border-top-left-radius: var(--radius);
-      border-top-right-radius: var(--radius);
-      box-shadow: 0 -6px 20px rgba(0,0,0,0.06);
-    }
+.cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
+.cart-item { display: flex; justify-content: space-between; margin-bottom: 6px; opacity: 0; animation: fadeIn 0.4s forwards; }
+@keyframes fadeIn { to { opacity:1; } }
 
-    .success {
-      text-align: center;
-      padding: 60px 20px;
-    }
-  </style>
+.success { text-align: center; padding: 60px 20px; }
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .menu-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  select, textarea, button { font-size: 18px; padding: 14px; }
+  .card { padding: 20px; }
+}
+</style>
 </head>
 <body>
 
 <div id="stepPc" class="pc-select">
-  <div class="card" style="max-width:400px; width:100%">
+  <div class="card" style="width:100%">
     <h2>Заказ еды</h2>
     <p>Выберите номер вашего ПК</p>
     <select id="pcNumber"></select>
@@ -130,17 +113,21 @@
       <h2>Меню</h2>
       <div>ПК № <span id="pcLabel"></span></div>
     </div>
-
-    <div class="menu">
-      <div id="leftCol"></div>
-      <div id="rightCol"></div>
-    </div>
+    <div id="menuList" class="menu-list"></div>
   </div>
 </div>
 
-<div id="cart" class="cart hidden">
-  <div id="cartItems"></div>
-  <textarea id="comment" placeholder="Комментарий к заказу"></textarea>
+<button class="cart-button" id="cartBtn" onclick="toggleCart()">🛒
+  <div class="cart-count" id="cartCount">0</div>
+</button>
+
+<div id="cartPanel" class="cart-panel">
+  <div class="cart-header">
+    <strong>Корзина</strong>
+    <button onclick="toggleCart()">✕</button>
+  </div>
+  <div id="cartItems" style="flex-grow:1; overflow-y:auto;"></div>
+  <textarea id="comment" placeholder="Комментарий к заказу" style="margin-top:8px;"></textarea>
   <button style="margin-top:10px" onclick="sendOrder()">Отправить заказ</button>
 </div>
 
@@ -151,97 +138,82 @@
 </div>
 
 <script>
-  const pcSelect = document.getElementById('pcNumber');
-  for (let i = 1; i <= 40; i++) {
-    pcSelect.innerHTML += `<option value="${i}">ПК ${i}</option>`;
-  }
+const pcSelect=document.getElementById('pcNumber');
+for(let i=1;i<=40;i++){ pcSelect.innerHTML+=`<option value="${i}">ПК ${i}</option>`; }
 
-  const menuData = [
-    { name: 'Эспрессо', price: 1290 },
-    { name: 'Американо', price: 1590 },
-    { name: 'Капучино', price: 1990 },
-    { name: 'Латте', price: 2290 },
-    { name: 'Раф', price: 2290 },
-    { name: 'Батч брю', price: 1990 },
-    { name: 'Ванильный латте', price: 2490 },
-    { name: 'Матча кокос латте', price: 2490 },
-    { name: 'Tassay 230 мл', price: 1590 },
-    { name: 'Borjomi 330 мл', price: 3190 },
-    { name: 'Coca-Cola', price: 1290 },
-    { name: 'Red Bull', price: 2390 },
-    { name: 'Медовик', price: 2590 },
-    { name: 'Классический чизкейк', price: 3290 },
-    { name: 'Mojito', price: 2490 }
-  ];
+const menuData=[
+  {name:'Эспрессо',price:1290},{name:'Американо',price:1590},{name:'Капучино',price:1990},
+  {name:'Латте',price:2290},{name:'Раф',price:2290},{name:'Батч брю',price:1990},
+  {name:'Ванильный латте',price:2490},{name:'Матча кокос латте',price:2490},
+  {name:'Tassay 230 мл',price:1590},{name:'Borjomi 330 мл',price:3190},
+  {name:'Coca-Cola',price:1290},{name:'Red Bull',price:2390},{name:'Медовик',price:2590},
+  {name:'Классический чизкейк',price:3290},{name:'Mojito',price:2490}
+];
 
-  const cart = [];
+const cart=[];
+function goToMenu(){
+  if(!pcSelect.value){ alert('Выберите номер ПК'); return; }
+  document.getElementById('stepPc').classList.add('hidden');
+  document.getElementById('stepMenu').classList.remove('hidden');
+  document.getElementById('pcLabel').innerText=pcSelect.value;
+  renderMenu();
+}
 
-  function goToMenu() {
-    if (!pcSelect.value) {
-      alert('Выберите номер ПК');
-      return;
-    }
-    document.getElementById('stepPc').classList.add('hidden');
-    document.getElementById('stepMenu').classList.remove('hidden');
-    document.getElementById('cart').classList.remove('hidden');
-    document.getElementById('pcLabel').innerText = pcSelect.value;
-    renderMenu();
-  }
+function renderMenu(){
+  const menuList=document.getElementById('menuList'); menuList.innerHTML='';
+  menuData.forEach(item=>{
+    const row=document.createElement('div'); row.className='menu-row';
+    row.innerHTML=`<div class="menu-name">${item.name}</div>
+      <div style="display:flex; gap:8px; align-items:center;"><span>${item.price} ₸</span>
+      <button onclick="animateAdd(this,'${item.name}',${item.price})">＋</button></div>`;
+    menuList.appendChild(row);
+  });
+}
 
-  function renderMenu() {
-    const left = document.getElementById('leftCol');
-    const right = document.getElementById('rightCol');
-    left.innerHTML = '';
-    right.innerHTML = '';
+function animateAdd(btn,name,price){
+  btn.style.transform='scale(1.4)';
+  setTimeout(()=>btn.style.transform='scale(1)',200);
+  addToCart(name,price);
+}
 
-    menuData.forEach((item, index) => {
-      const row = document.createElement('div');
-      row.className = 'menu-row';
-      row.innerHTML = `
-        <div class="menu-name">${item.name}</div>
-        <div>${item.price} ₸</div>
-        <button onclick="addToCart('${item.name}', ${item.price})">＋</button>
-      `;
-      (index % 2 === 0 ? left : right).appendChild(row);
-    });
-  }
+function addToCart(name,price){
+  cart.push({name,price});
+  renderCart();
+  openCart();
+}
 
-  function addToCart(name, price) {
-    cart.push({ name, price });
-    renderCart();
-  }
+function renderCart(){
+  const box=document.getElementById('cartItems'); box.innerHTML=''; let sum=0;
+  cart.forEach(i=>{
+    sum+=i.price;
+    const item=document.createElement('div'); item.className='cart-item'; item.innerHTML=`<span>${i.name}</span><span>${i.price} ₸</span>`;
+    box.appendChild(item);
+  });
+  box.innerHTML+=`<strong>Итого: ${sum} ₸</strong>`;
+  const count=document.getElementById('cartCount');
+  count.innerText=cart.length;
+  count.style.transform='scale(1.4)';
+  setTimeout(()=>count.style.transform='scale(1)',200);
+}
 
-  function renderCart() {
-    const box = document.getElementById('cartItems');
-    box.innerHTML = '';
-    let sum = 0;
-    cart.forEach(i => {
-      sum += i.price;
-      box.innerHTML += `<div class="cart-item"><span>${i.name}</span><span>${i.price} ₸</span></div>`;
-    });
-    box.innerHTML += `<strong>Итого: ${sum} ₸</strong>`;
-  }
+function toggleCart(){ document.getElementById('cartPanel').classList.toggle('open'); }
+function openCart(){ document.getElementById('cartPanel').classList.add('open'); }
 
-  function sendOrder() {
-    if (!cart.length) {
-      alert('Корзина пуста');
-      return;
-    }
-
-    fetch('YOUR_GOOGLE_SCRIPT_URL', {
-      method: 'POST',
-      body: JSON.stringify({
-        pc: pcSelect.value,
-        items: cart.map(i => i.name).join(', '),
-        sum: cart.reduce((a, b) => a + b.price, 0),
-        comment: document.getElementById('comment').value
-      })
-    });
-
-    document.getElementById('stepMenu').classList.add('hidden');
-    document.getElementById('cart').classList.add('hidden');
-    document.getElementById('success').classList.remove('hidden');
-  }
+function sendOrder(){
+  if(!cart.length){ alert('Корзина пуста'); return; }
+  fetch('YOUR_GOOGLE_SCRIPT_URL',{
+    method:'POST',
+    body: JSON.stringify({
+      pc: pcSelect.value,
+      items: cart.map(i=>i.name).join(', '),
+      sum: cart.reduce((a,b)=>a+b.price,0),
+      comment: document.getElementById('comment').value
+    })
+  });
+  document.getElementById('stepMenu').classList.add('hidden');
+  toggleCart();
+  document.getElementById('success').classList.remove('hidden');
+}
 </script>
 </body>
 </html>
