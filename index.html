@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Заказ еды — Компьютерный клуб</title>
+  <style></style>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #F6F4F1;
+      --bg-card: #FFFFFF;
+      --bg-soft: #EFEAE6;
+      --accent: #B89B7C;
+      --accent-hover: #A88A6A;
+      --text-main: #2E2E2E;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Cormorant Garamond', serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+    }
+
+    h2 { margin-bottom: 12px; }
+
+    .hidden { display: none; }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+    }
+
+    .pc-select {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    select, textarea, button {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid #ddd;
+      font-size: 16px;
+      font-family: inherit;
+    }
+
+    button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .menu-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e6e1db;
+      font-size: 18px;
+    }
+
+    .menu-name { font-style: italic; }
+
+    .cart {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      padding: 16px;
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+      box-shadow: 0 -6px 20px rgba(0,0,0,0.06);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .success {
+      text-align: center;
+      padding: 60px 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="stepPc" class="pc-select">
+  <div class="card" style="max-width:400px; width:100%">
+    <h2>Заказ еды</h2>
+    <p>Выберите номер вашего ПК</p>
+    <select id="pcNumber"></select>
+    <button style="margin-top:16px" onclick="goToMenu()">Перейти к меню</button>
+  </div>
+</div>
+
+<div id="stepMenu" class="hidden">
+  <div class="container">
+    <div class="header">
+      <h2>Меню</h2>
+      <div>ПК № <span id="pcLabel"></span></div>
+    </div>
+
+    <div class="menu">
+      <div id="leftCol"></div>
+      <div id="rightCol"></div>
+    </div>
+  </div>
+</div>
+
+<div id="cart" class="cart hidden">
+  <div id="cartItems"></div>
+  <textarea id="comment" placeholder="Комментарий к заказу"></textarea>
+  <button style="margin-top:10px" onclick="sendOrder()">Отправить заказ</button>
+</div>
+
+<div id="success" class="hidden success">
+  <h2>Заказ принят</h2>
+  <p>Ожидайте доставку к вашему ПК</p>
+  <button onclick="location.reload()">Сделать еще заказ</button>
+</div>
+
+<script>
+  const pcSelect = document.getElementById('pcNumber');
+  for (let i = 1; i <= 40; i++) {
+    pcSelect.innerHTML += `<option value="${i}">ПК ${i}</option>`;
+  }
+
+  const menuData = [
+    { name: 'Эспрессо', price: 1290 },
+    { name: 'Американо', price: 1590 },
+    { name: 'Капучино', price: 1990 },
+    { name: 'Латте', price: 2290 },
+    { name: 'Раф', price: 2290 },
+    { name: 'Батч брю', price: 1990 },
+    { name: 'Ванильный латте', price: 2490 },
+    { name: 'Матча кокос латте', price: 2490 },
+    { name: 'Tassay 230 мл', price: 1590 },
+    { name: 'Borjomi 330 мл', price: 3190 },
+    { name: 'Coca-Cola', price: 1290 },
+    { name: 'Red Bull', price: 2390 },
+    { name: 'Медовик', price: 2590 },
+    { name: 'Классический чизкейк', price: 3290 },
+    { name: 'Mojito', price: 2490 }
+  ];
+
+  const cart = [];
+
+  function goToMenu() {
+    if (!pcSelect.value) {
+      alert('Выберите номер ПК');
+      return;
+    }
+    document.getElementById('stepPc').classList.add('hidden');
+    document.getElementById('stepMenu').classList.remove('hidden');
+    document.getElementById('cart').classList.remove('hidden');
+    document.getElementById('pcLabel').innerText = pcSelect.value;
+    renderMenu();
+  }
+
+  function renderMenu() {
+    const left = document.getElementById('leftCol');
+    const right = document.getElementById('rightCol');
+    left.innerHTML = '';
+    right.innerHTML = '';
+
+    menuData.forEach((item, index) => {
+      const row = document.createElement('div');
+      row.className = 'menu-row';
+      row.innerHTML = `
+        <div class="menu-name">${item.name}</div>
+        <div>${item.price} ₸</div>
+        <button onclick="addToCart('${item.name}', ${item.price})">＋</button>
+      `;
+      (index % 2 === 0 ? left : right).appendChild(row);
+    });
+  }
+
+  function addToCart(name, price) {
+    cart.push({ name, price });
+    renderCart();
+  }
+
+  function renderCart() {
+    const box = document.getElementById('cartItems');
+    box.innerHTML = '';
+    let sum = 0;
+    cart.forEach(i => {
+      sum += i.price;
+      box.innerHTML += `<div class="cart-item"><span>${i.name}</span><span>${i.price} ₸</span></div>`;
+    });
+    box.innerHTML += `<strong>Итого: ${sum} ₸</strong>`;
+  }
+
+  function sendOrder() {
+    if (!cart.length) {
+      alert('Корзина пуста');
+      return;
+    }
+
+    fetch('YOUR_GOOGLE_SCRIPT_URL', {
+      method: 'POST',
+      body: JSON.stringify({
+        pc: pcSelect.value,
+        items: cart.map(i => i.name).join(', '),
+        sum: cart.reduce((a, b) => a + b.price, 0),
+        comment: document.getElementById('comment').value
+      })
+    });
+
+    document.getElementById('stepMenu').classList.add('hidden');
+    document.getElementById('cart').classList.add('hidden');
+    document.getElementById('success').classList.remove('hidden');
+  }
+</script>
+</body>
+</html>
